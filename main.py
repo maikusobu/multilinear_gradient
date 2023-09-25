@@ -37,9 +37,6 @@ def main():
         moment_v_coef  = npc.VectorMatrixOperations([0.0] * (len(coefficients)))
         new_coefficents = npc.VectorMatrixOperations(coefficients)
         t = 0        
-        # Adam optimization algorithm
-        # https://medium.com/@karpathy/yes-you-should-understand-backprop-e2f06eab496b#.4y3ym3x4
-        
         while True:
             cost = loss_function(new_coefficents, x_training_set, y_training_set)
             cost_list.append(cost)
@@ -55,7 +52,9 @@ def main():
             delta = ((learning_rate / (moment_v_coef**0.5) + 1e-8) * (b1 * moment_m_coef + (1-b1) * gradients / (1-b1**t))) 
             new_coefficents = new_coefficents - delta
         return new_coefficents, cost_list
-    
+    # Đoạn code này sử dụng phương thức tối ưu Adam
+    # Adam optimization algorithm
+    # https://machinelearningmastery.com/adam-optimization-algorithm-for-deep-learning/
     def predict(coefficients, x_testing_set):
         return npc.dotProduct(x_testing_set, coefficients)        
     def start_training():
@@ -82,5 +81,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-        
         
