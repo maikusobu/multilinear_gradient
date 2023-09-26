@@ -55,13 +55,13 @@ def main():
             v_coef = v_coef * b2 + (1 - b2)* gradients**2
             m_coef_bias_correction = m_coef / (1-b1 ** t) 
             v_coef_bias_correction= v_coef / (1-b2 ** t)
+            delta = ((learning_rate / (v_coef_bias_correction**0.5) + epsilon) * (b1 * m_coef_bias_correction + (1-b1) * gradients / (1-b1**t)))
             # biến thể của 
-            # delta = learning_rate * m_coef_bias_correction / (v_coef_bias_correction**0.5 + epsilon)
-            delta = ((learning_rate / (v_coef_bias_correction**0.5) + epsilon) * (b1 * m_coef_bias_correction + (1-b1) * gradients / (1-b1**t)))    
+            # delta = learning_rate * m_coef_bias_correction / (v_coef_bias_correction**0.5 + epsilon)    
             new_coefficents = new_coefficents - delta
         return new_coefficents, cost_list
     # Đoạn code này sử dụng thuật toán tối ưu Adam
-    # Adam optimization algorithm, adopting and modifying in https://www.geeksforgeeks.org/ml-multiple-linear-regression-using-python/
+    # Adam optimization algorithm, adopting and modifying from https://www.geeksforgeeks.org/ml-multiple-linear-regression-using-python/
     # Blog for adam optimization algorithm: https://machinelearningmastery.com/adam-optimization-from-scratch/
     def predict(coefficients, x_testing_set):
         return npc.dotProduct(x_testing_set, coefficients)        
