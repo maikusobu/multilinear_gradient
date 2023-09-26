@@ -28,33 +28,41 @@ def main():
         return npc.mean((npc.dotProduct(X_training_set, coefficients)-Y_training_set)**2) / 2
     def gradient_descent(coeffcients, x_training_set : npc.VectorMatrixOperations, y_training_set : npc.VectorMatrixOperations):
         return npc.mean(((x_training_set).Transpose() * (npc.dotProduct(x_training_set, coeffcients) - y_training_set)), axis=1)
-    def multilinear_regression(coefficients, x_training_set, y_training_set, learning_rate, b1=0.9, b2=0.999, epsilon=1e-8):
+    def multilinear_regression(coefficients, x_training_set, y_training_set, learning_rate, b1=0.9, b2=0.999, epsilon=1e-8, itr=1000):
+        # Biến epsilon được sử dung để ngăn không có việc phải chia cho 0 trong thuật toán adam và 
+        ## được dùng để kiểm soát độ biến thiên giữa prev_cost và cost để thoát khỏi vòng lặp
+        # b1, b2 là các hệ số giảm trừ trọng số cho các ước lượng momen đầu tiên và monen thứ hai
         cost_list = []
         prev_cost = 0.0
-        m_coef = npc.VectorMatrixOperations([0.0] * (len(coefficients)))
-        v_coef = npc.VectorMatrixOperations([0.0] * (len(coefficients)))
-        moment_m_coef = npc.VectorMatrixOperations([0.0] * (len(coefficients)))
-        moment_v_coef  = npc.VectorMatrixOperations([0.0] * (len(coefficients)))
+        m_coef = npc.VectorMatrixOperations([0.0] * (len(coefficients))) # moment đầu tiên
+        v_coef = npc.VectorMatrixOperations([0.0] * (len(coefficients))) # moment thứ hai
+        m_coef_bias_correction = npc.VectorMatrixOperations([0.0] * (len(coefficients))) 
+        v_coef_bias_correction = npc.VectorMatrixOperations([0.0] * (len(coefficients))) 
+        # Bias_correction để cải thiện ước lượng cho cả moment đầu tiên và moment thứ hai, vì 
+        # việc bắt đầu ở 0 có thể tạo ra bias (sai số) trong các ước lượng này, khiến cho chúng 
+        # có xu hướng gần với 0 hơn so với giá trị thực sự
         new_coefficents = npc.VectorMatrixOperations(coefficients)
         t = 0        
         while True:
             cost = loss_function(new_coefficents, x_training_set, y_training_set)
-            cost_list.append(cost)
             if abs(prev_cost - cost) < epsilon:
                 break
+            cost_list.append(cost)
             prev_cost = cost
             gradients = gradient_descent(new_coefficents, x_training_set, y_training_set)
             t+=1
             m_coef = m_coef * b1 + gradients * (1 - b1)
             v_coef = v_coef * b2 + (1 - b2)* gradients**2
-            moment_m_coef = m_coef / (1-b1 ** t)
-            moment_v_coef = v_coef / (1-b2 ** t)
-            delta = ((learning_rate / (moment_v_coef**0.5) + 1e-8) * (b1 * moment_m_coef + (1-b1) * gradients / (1-b1**t))) 
+            m_coef_bias_correction = m_coef / (1-b1 ** t) 
+            v_coef_bias_correction= v_coef / (1-b2 ** t)
+            # biến thể của 
+            # delta = learning_rate * m_coef_bias_correction / (v_coef_bias_correction**0.5 + epsilon)
+            delta = ((learning_rate / (v_coef_bias_correction**0.5) + epsilon) * (b1 * m_coef_bias_correction + (1-b1) * gradients / (1-b1**t)))    
             new_coefficents = new_coefficents - delta
         return new_coefficents, cost_list
-    # Đoạn code này sử dụng phương thức tối ưu Adam
-    # Adam optimization algorithm
-    # https://machinelearningmastery.com/adam-optimization-algorithm-for-deep-learning/
+    # Đoạn code này sử dụng thuật toán tối ưu Adam
+    # Adam optimization algorithm, adopting and modifying in https://www.geeksforgeeks.org/ml-multiple-linear-regression-using-python/
+    # Blog for adam optimization algorithm: https://machinelearningmastery.com/adam-optimization-from-scratch/
     def predict(coefficients, x_testing_set):
         return npc.dotProduct(x_testing_set, coefficients)        
     def start_training():
